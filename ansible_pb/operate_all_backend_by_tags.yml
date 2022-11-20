@@ -1,0 +1,21 @@
+- name: Operate all backend by tags
+  hosts: backend
+  tasks:
+    - name: Start Nginx
+      command: pwd
+      notify: Start Nginx
+      tags: start_nginx
+
+    - name: Stop Nginx
+      command: pwd
+      notify: Stop Nginx
+      tags: stop_nginx 
+
+    - name: Reload Nginx
+      command: pwd
+      notify: Reload Nginx
+      tags: reload_nginx 
+
+  handlers:
+    - include: handlers/main.yml
+

@@ -1,0 +1,26 @@
+
+- name: Deploy backend nginx * 2
+  hosts: backend
+  vars:
+    Component_name: nginx
+
+  roles:
+    - role: "roles/nginx"
+
+  tasks:
+    - name: Notify Start Nginx
+      command: pwd
+      notify: Start Nginx
+  handlers:
+    - include: handlers/main.yml
+
+- name: Add net1 for vm1
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: include_vars
+      include_vars: vars/main.yml
+    # 2个IP时，{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }} 总是不能正确获取hosts中的地址？
+    - name: Add net1 for vm1
+      command: docker network connect --ip 11.1.0.2 net1 {{ vm1_ip }}
+

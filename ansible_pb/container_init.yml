@@ -1,0 +1,24 @@
+
+- name: Run Docker Container
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: include_vars
+      include_vars: vars/main.yml
+
+    - name: Build Dockerfile
+      command: docker build -t centos_withssh ../build_image
+
+    - name: Create Docker Network
+      command: docker network create --subnet={{ item.cidr }} {{ item.name }}
+      loop:
+      - {cidr: "{{ docker_haproxy_net_cidr }}", name: "{{ docker_haproxy_net_name }}"}
+      - {cidr: "{{ docker_internal_net_cidr }}", name: "{{ docker_internal_net_name }}" }
+
+    - name: Run Container * 2
+      # --privileged=true make systemctl work normal
+      command: docker run -itd --privileged=true --network {{ item.net }} --ip {{ item.ip }} --name {{ item.ip }} centos_withssh
+      loop:
+      - {ip: "{{ vm1_ip }}", net: "{{ docker_internal_net_name }}"}
+      - {ip: "{{ vm2_ip }}", net: "{{ docker_internal_net_name }}"}
+

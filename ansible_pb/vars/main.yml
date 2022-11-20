@@ -1,0 +1,12 @@
+---
+vm1_ip: 11.2.0.2
+vm2_ip: 11.2.0.3
+haproxy_ip: 11.1.0.2
+
+docker_internal_net_name: net2
+docker_internal_net_cidr: 11.2.0.0/24
+
+docker_haproxy_net_name: net1
+docker_haproxy_net_cidr: 11.1.0.0/24
+
+

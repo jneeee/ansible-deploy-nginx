@@ -1,0 +1,4 @@
+
+- name: Append new backend to haproxy.cfg
+  shell: echo "    server  app3 {{ new_ip }}:80 check" >> /etc/haproxy/haproxy.cfg
+

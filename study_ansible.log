@@ -1,0 +1,136 @@
+
+>  记录ansible的资料和学习笔记
+## ansible的基本概念
+
+https://docs.ansible.com/ansible/latest/
+https://www.w3cschool.cn/automate_with_ansible/
+
+- role
+面向对象的思想，
+- Inventory (./hosts)
+  - hosts
+  - manage (别名、分组、主机变量)
+- Collections(Modules): 
+  - Collections are a distribution format for Ansible content that can include playbooks, roles, modules, and plugins.
+  - https://docs.ansible.com/ansible/latest/collections/ 
+  - install from [ansible Galaxy](https://galaxy.ansible.com)
+- Vars: 
+  - 可以在不同的地方定义（playbook roles /vars/main.yml等）
+  - 可以用 when 和 loop 关键词遍历
+- Facts
+  - 是远程主机中的环境变量，不能人为修改，大多以`ansible_`开头
+  - 例如远程主机的IP地址或操作系统 如`hostvars[inventory_hostname]['ansible_default_ipv4']['address']`
+- Playbooks
+  - 可以包含多个play，每个play可以包含多个tasks（按顺序执行）
+- Configuration files
+  - 优先读取当前路径下的`ansible.cfg`，其次``
+  - 定义一些 ansible 配置信息（如 ssh_key, inventory 路径）
+* library
+* template
+
+## playbook结构
+
+```yml
+- name:
+  hosts:
+  become: yes
+  vars:
+  roles:
+  serial: 1 # 并行host数量1
+  tasks:
+    - name
+      command:
+      shell:
+      action: (衍生出很多常用关键词 比如 apt yum systemctl service copy file)
+      notify: 
+      wait_for: 任务暂停，直到...
+      environment: 导入环境变量（例如 http_proxy ）
+      template:
+        src=templates/index.html.j2
+        dest=/usr/share/nginx/html/index.html
+        owner=www-data
+        group=www-data
+        mode="644"
+        backup=yes
+      lineinfile: > # 修改行
+        dest=/etc/nginx/nginx.conf
+        regexp="server_tokens off;"
+        insertafter="# server_tokens off;"
+        line="server_tokens off;"
+        state=present
+      ansible.builtin.systemd:
+        name: nginx
+        state: [started|stopped] [restarted|reloaded] [Ansible Docs][1]
+      loop: # 搭配 command 里有变量时使用
+      when: # 某些条件下执行
+  pre_tasks: # 在tasks前执行
+  post_tasks:
+    # 关键词同tasks，在task执行完之后执行
+  handlers:
+    # 实际上也是一些tasks列表，但是多次notify只会被执行一次
+
+```
+关键词 include 跟上文件路径，相当于把文件整篇嵌入。
+
+## TODO
+- 主机变量的获取
+- import_tasks include_tasks diff
+- local repo
+
+
+前提
+​​已安装ansible docker
+
+```bash
+docker network create --subnet=11.1.0.0/16 net1
+docker network create --subnet=11.2.0.0/16 net2
+
+docker build -t centos_withssh build_doc_image
+docker run -itd --network net2 --name vm3 centos_withssh
+
+docker run -itd  --network net1 --ip 11.1.0.2 --name vm1 centos_withssh
+docker network connect --ip 11.2.0.3 net2 vm1
+docker run -itd  --network net2 --ip 11.2.0.2 --name vm2 centos_withssh
+```
+
+## ansible打印result
+断点调试：<https://docs.ansible.com/ansible/latest/user_guide/playbooks_debugger.html>
+**debugger: always**
+
+```yml
+---
+- hosts: all
+  tasks:
+    - name: test
+      command: pwd
+      register: pwd_result # register指令把pwd执行结果寄存到自定义变量中
+    - name: echo pwd
+      debug:
+        msg: "{{pwd_result}}"  # 打印变量
+```
+
+
+## include_vars 用法
+
+```
+- name: test playbook
+  hosts: localhost
+#  debugger: always
+
+  tasks:
+    - name: include_vars
+      include_vars: vars/main.yml
+    - name: print "{{ item }}" # 此处只是字符串
+      command: echo "{{ item }}"
+      loop:
+        - "{{ docker_internal_net_name }}"
+        - "{{ vm1_ip }}"
+```
+
+[动态添加主机](https://docs.ansible.com/ansible/2.9/modules/add_host_module.html)
+
+1: https://docs.ansible.com/ansible/latest/collections/ansible/builtin/systemd_module.html
+
+
+http://nginx.org/packages/centos/8/x86_64/RPMS/nginx-1.20.2-1.el8.ngx.x86_64.rpm
+https://rpmfind.net/linux/centos/8.5.2111/AppStream/x86_64/os/Packages/haproxy-1.8.27-2.el8.x86_64.rpm

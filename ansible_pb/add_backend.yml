@@ -1,0 +1,45 @@
+
+- name: Run Container
+  hosts: localhost
+
+  tasks:
+    - name: include_vars
+      include_vars: vars/main.yml
+    - name: Run Container
+      command: docker run -itd --privileged=true --network "{{ docker_internal_net_name }}" --ip "{{ new_ip }}" --name "{{ new_ip }}" centos_withssh
+      tags: created
+    - name: add host to group "new_ip_inventory"
+      add_host:
+        name: "{{ new_ip }}"
+        groups: new_ip_inventory
+
+- name: Deploy Nginx
+  hosts: new_ip_inventory
+
+  roles:
+    - role: "roles/nginx"
+  tasks:
+    - name: Do notify
+      command: pwd
+      notify:
+        - Start Nginx
+
+  handlers:
+    - include: handlers/main.yml
+
+- name: Reload Haproxy
+  hosts: front
+  tasks:
+    - name: flag
+      command: pwd
+
+    - include_tasks: tasks/append_new_backend_to_haproxy.yml # var new_ip
+
+    - name: Do notify
+      command: pwd
+      notify:
+        - Reload Haproxy
+
+  handlers:
+    - include: handlers/main.yml
+

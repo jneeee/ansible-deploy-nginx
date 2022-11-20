@@ -1,0 +1,20 @@
+- name: delete resource on host
+  hosts: localhost
+  tasks:
+    - name: Include_vars vars
+      include_vars: vars/main.yml
+
+    - name: Stop containers which's IMAGE is centos_withssh
+      shell: docker ps | grep centos_withssh | awk '{print $1}' | xargs docker stop
+      ignore_errors: yes
+
+    - name: Delete containers which's IMAGE is centos_withssh
+      shell: docker ps -a | grep centos_withssh | awk '{print $1}' | xargs docker rm
+      ignore_errors: yes
+
+    - name: Delete Docker net
+      command: docker network rm {{ item }}
+      loop:
+        - "{{ docker_internal_net_name }}"
+        - "{{ docker_haproxy_net_name }}"
+

@@ -1,0 +1,9 @@
+- name: Check HTTP LB Result
+  hosts: localhost
+  tasks:
+    - name: Include vars
+      include_vars: vars/main.yml
+    - name: Run Check_lb.py
+      command: python files/check_lb.py "{{ haproxy_ip }}"
+      register: result
+    - debug: var=result.stdout

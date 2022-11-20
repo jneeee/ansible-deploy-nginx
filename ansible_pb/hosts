@@ -1,0 +1,9 @@
+
+[backend]
+vm1_ip ansible_ssh_host=11.2.0.2
+vm2_ip ansible_ssh_host=11.2.0.3
+
+[front]
+vm1_ip
+
+[new_ip_inventory]

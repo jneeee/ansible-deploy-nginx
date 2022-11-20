@@ -1,0 +1,26 @@
+---
+- name: Stop Nginx
+  ansible.builtin.systemd:
+    name: nginx
+    state: stopped
+
+- name: Start Nginx
+  ansible.builtin.systemd:
+    name: nginx
+    state: started
+
+- name: Reload Nginx
+  ansible.builtin.systemd:
+    name: nginx
+    state: reloaded
+  listen: Conf changed
+
+- name: Reload Haproxy
+  ansible.builtin.systemd:
+    name: haproxy
+    state: reloaded
+
+- name: Start Haproxy
+  ansible.builtin.systemd:
+    name: haproxy
+    state: started
