@@ -1,10 +1,12 @@
 
-## 写在前面
+## Ansible 部署一个 Nginx 代理两个后端
+
+这是一个学习`ansible`的练手项目
 
 实现一个用ansible**部署、管理、测试**的 front haproxy\*1, backend nginx\*2的七层负载业务。
 项目旨在熟悉ansible及其各种特性概念 `role, inventory, host vars, library, template` 等等。部分步骤有其他更简单的完成方式，比如把deploy_nginx抽象成一个role这步，直接在dockerfile中实现更简单。某些概念如果理解有误欢迎指正。
 
-![](pic/bp.png)
+![](/pic/bp.png)
 
 文件夹介绍：
 - `ansible_pb/` ansible playbook
@@ -27,7 +29,10 @@ ansible-playbook operate_all_backend_by_tags.yml --tags "start_nginx|stop_nginx|
 ansible-playbook check_lb_res.yml
 ansible-playbook undeploy.yml
 ```
-![test_res](pic/test_res.png)
+
+测试结果：（一共访问100次，每个后端ID都被访问了50次）
+
+![](/pic/test_res.png)
 
 
 ## Todo

@@ -1,0 +1,12 @@
+
+- name: test playbook
+  hosts: localhost
+#  debugger: always
+
+  tasks:
+    - name: task1
+      command: pwd
+      register: res
+    - name: print
+      debug: msg={{ hostvars }}
+
